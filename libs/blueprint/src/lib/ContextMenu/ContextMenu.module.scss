@@ -21,20 +21,55 @@
   flex-direction: column;
   animation: ContextMenuEntry 400ms;
 
-  & > button {
+  button {
     display: flex;
     align-items: center;
     font: inherit;
     background-color: white;
     cursor: pointer;
     border-radius: 4px;
-    height: 40px;
+    height: 36px;
+    font-size: 14px;
     transition: background-color 250ms;
+    width: 100%;
+
+    svg {
+      font-size: 16px;
+    }
     & > svg {
       margin-right: 4px;
     }
     &:hover {
       background-color: #eeeeee;
+    }
+  }
+}
+
+.CategoryMenuItem {
+  position: relative;
+
+  & > button {
+    & > span {
+      display: flex;
+      align-items: center;
+      flex: 1;
+      & > svg {
+        margin-right: 4px;
+      }
+    }
+  }
+
+  & > .dropdown {
+    position: absolute;
+    padding: 4px;
+    border-radius: 4px;
+    background-color: white;
+    left: 100%;
+    top: -4px;
+    box-shadow: 0 4px 10px rgba(black, 0.1);
+
+    button {
+      white-space: nowrap;
     }
   }
 }

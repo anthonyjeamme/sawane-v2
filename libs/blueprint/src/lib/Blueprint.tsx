@@ -13,7 +13,7 @@ import {
   TrashSimple,
 } from 'phosphor-react';
 import { useContextMenu } from './ContextMenu/ContextMenu.hook';
-import { ContextMenu } from './ContextMenu/ContextMenu';
+import { ContextMenu, ContextMenuProvider } from './ContextMenu/ContextMenu';
 
 const className = classNameModule(styles);
 
@@ -23,6 +23,7 @@ export const Blueprint = () => {
       {
         id: 'a',
         title: 'hello',
+        color: '#0984e3',
         actions: [
           {
             id: 'b',
@@ -33,6 +34,7 @@ export const Blueprint = () => {
       },
       {
         id: 'b',
+        color: '#d63031',
         title: 'world',
         actions: [],
       },
@@ -45,7 +47,7 @@ export const Blueprint = () => {
   const lastMousePositionRef = useRef<{ x: number; y: number } | null>(null);
 
   const containerRef = useRef<HTMLDivElement>(null);
-  const contextMenu = useContextMenu(containerRef);
+  // const contextMenu = useContextMenu(containerRef);
 
   const [arrows, setArrows] = useState<TArrow[]>([]);
 
@@ -145,7 +147,7 @@ export const Blueprint = () => {
 
   return (
     <>
-      <ContextMenu
+      {/* <ContextMenu
         {...contextMenu}
         handleAction={(action) => {
           if (action === 'new-step') {
@@ -189,7 +191,7 @@ export const Blueprint = () => {
             updateLinks();
           }
         }}
-      />
+      /> */}
       <div
         className={styles['Blueprint']}
         ref={containerRef}
@@ -350,101 +352,108 @@ const Item = ({
   const { isDragging } = useDragger(draggerRef, position, handleUpdatePosition);
 
   return (
-    <div
-      {...className('ItemContainer')}
-      ref={rootRef}
-      style={{
-        transform: `translate(${position?.x}px, ${position?.y}px)`,
-      }}
-    >
-      <div {...className('Item', { isDragging })}>
-        <header
-          onClick={() => {
-            handleCLickLink();
-          }}
-        >
-          <span className={styles['title']}>
-            <input defaultValue={item.title} />
-          </span>
-          <button
-            className={styles['remove']}
+    <ContextMenuProvider>
+      <div
+        {...className('ItemContainer')}
+        ref={rootRef}
+        style={{
+          transform: `translate(${position?.x}px, ${position?.y}px)`,
+        }}
+      >
+        <div {...className('Item', { isDragging })}>
+          <header
             onClick={() => {
-              handleRemove();
+              handleCLickLink();
+            }}
+            style={{
+              backgroundColor: item.color,
             }}
           >
-            <TrashSimple />
-          </button>
-          <button className={styles['edit']} title="Editer">
-            <PencilSimple weight="bold" />
-          </button>
-          <button ref={draggerRef} className={styles['dragger']}>
-            <DotsSixVertical weight="bold" />
-          </button>
-        </header>
-        <div className={styles['content']}>
-          {item.actions.map((action) => (
-            <div
-              {...className('action')}
-              key={action.id}
+            <span className={styles['title']}>
+              <input defaultValue={item.title} />
+            </span>
+            <button
+              className={styles['remove']}
               onClick={() => {
-                handleClickActionlink(action.id);
+                handleRemove();
               }}
             >
-              <button
+              <TrashSimple />
+            </button>
+            <button className={styles['edit']} title="Editer">
+              <PencilSimple weight="bold" />
+            </button>
+            <button ref={draggerRef} className={styles['dragger']}>
+              <DotsSixVertical weight="bold" />
+            </button>
+          </header>
+          <div className={styles['content']}>
+            {item.actions.map((action) => (
+              <div
+                {...className('action')}
+                key={action.id}
                 onClick={() => {
-                  handleUpdate({
-                    ...item,
-                    actions: item.actions.filter(({ id }) => id !== action.id),
-                  });
+                  handleClickActionlink(action.id);
                 }}
               >
-                <TrashSimple />
-              </button>
-              <button>
-                <Lightning />
-              </button>
-              <span>
-                <input
-                  defaultValue={action.text}
-                  onChange={(e) => {
+                <button
+                  onClick={() => {
                     handleUpdate({
                       ...item,
-                      actions: item.actions.map((_action) =>
-                        _action.id === action.id
-                          ? {
-                              ...action,
-                              text: e.target.value,
-                            }
-                          : _action
+                      actions: item.actions.filter(
+                        ({ id }) => id !== action.id
                       ),
                     });
                   }}
-                />
-              </span>
-            </div>
-          ))}
+                >
+                  <TrashSimple />
+                </button>
+                <button>
+                  <Lightning />
+                </button>
+                <span>
+                  <input
+                    defaultValue={action.text}
+                    onChange={(e) => {
+                      handleUpdate({
+                        ...item,
+                        actions: item.actions.map((_action) =>
+                          _action.id === action.id
+                            ? {
+                                ...action,
+                                text: e.target.value,
+                              }
+                            : _action
+                        ),
+                      });
+                    }}
+                  />
+                </span>
+              </div>
+            ))}
 
-          <div
-            {...className('add-action')}
-            onClick={() => {
-              handleUpdate({
-                ...item,
-                actions: [
-                  ...item.actions,
-                  {
-                    id: uniqid(),
-                    text: 'Nouvelle action',
-                    link: null,
-                  },
-                ],
-              });
-            }}
-          >
-            <Plus />
+            <div
+              {...className('add-action')}
+              onClick={() => {
+                handleUpdate({
+                  ...item,
+                  actions: [
+                    ...item.actions,
+                    {
+                      id: uniqid(),
+                      text: 'Nouvelle action',
+                      link: null,
+                    },
+                  ],
+                });
+              }}
+            >
+              <Plus />
+            </div>
           </div>
         </div>
       </div>
-    </div>
+    </ContextMenuProvider>
   );
 };
 
