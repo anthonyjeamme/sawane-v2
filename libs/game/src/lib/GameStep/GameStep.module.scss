@@ -1,0 +1,56 @@
+@keyframes GameStepEntry {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.GameStep {
+  //
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: flex;
+
+  animation: GameStepEntry 1s;
+
+  & > div {
+    margin: auto;
+    max-width: 800px;
+    background-color: white;
+    padding: 20px;
+
+    & > .text {
+      //
+      font-size: 22px;
+      text-align: center;
+      font-weight: 300;
+    }
+
+    & > .actions {
+      display: flex;
+      flex-direction: column;
+      margin-top: 40px;
+
+      & > button {
+        font: inherit;
+        padding: 10px;
+        font-size: 22px;
+        font-weight: 300;
+        background-color: transparent;
+        cursor: pointer;
+        transition: transform 400ms;
+
+        @media (pointer: fine) {
+          &:hover {
+            transform: scale(1.05);
+          }
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,49 @@
+.GameChapter {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+}
+
+@keyframes ChapterIntroduction {
+  from {
+    opacity: 0;
+  }
+
+  10% {
+    opacity: 1;
+  }
+
+  80% {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
+}
+
+.ChapterIntroduction {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: black;
+  color: white;
+  display: flex;
+  z-index: 1000;
+  animation: ChapterIntroduction 3s;
+  animation-timing-function: ease-in;
+  animation-fill-mode: both;
+
+  & > div {
+    margin: auto;
+
+    & > h2 {
+      font-family: 'Cookie', cursive;
+      font-size: 60px;
+      margin: 0;
+    }
+  }
+}
