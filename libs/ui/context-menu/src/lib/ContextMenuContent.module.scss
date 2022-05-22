@@ -1,0 +1,76 @@
+@keyframes ContextSubMenuEntry {
+  from {
+    opacity: 0;
+    transform: translateX(-6px);
+  }
+
+  50% {
+    opacity: 1;
+  }
+  to {
+    transform: none;
+  }
+}
+
+.ContextMenuContent {
+  display: flex;
+  flex-direction: column;
+
+  button {
+    height: 36px;
+    width: 100%;
+    font: inherit;
+    cursor: pointer;
+    text-align: left;
+    display: flex;
+    align-items: center;
+    background-color: transparent;
+    transition: background-color 250ms;
+
+    &:hover {
+      background-color: #eeeeee;
+    }
+
+    & > .icon {
+      width: 24px;
+    }
+
+    & > .label {
+      padding-right: 6px;
+    }
+
+    & > .caret {
+      margin-left: auto;
+      font-size: 12px;
+    }
+  }
+}
+
+.separator {
+  height: 1px;
+  width: calc(100% - 24px);
+  background-color: rgba(black, 0.1);
+  margin: 4px auto;
+}
+
+.MenuItem {
+  position: relative;
+
+  & > button {
+    & > .label {
+      padding-right: 10px;
+    }
+  }
+
+  & > .submenu {
+    position: absolute;
+    background-color: white;
+    border-radius: 4px;
+    padding: 4px;
+    left: 100%;
+    top: -4px;
+    z-index: 10;
+    box-shadow: -4px 0 10px rgba(black, 0.1);
+    animation: ContextSubMenuEntry 250ms;
+  }
+}

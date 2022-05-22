@@ -18,6 +18,7 @@
       "@sawane/blueprint": ["libs/blueprint/src/index.ts"],
       "@sawane/game": ["libs/game/src/index.ts"],
       "@sawane/types": ["libs/types/src/index.ts"],
+      "@sawane/ui/context-menu": ["libs/ui/context-menu/src/index.ts"],
       "@sawane/utils": ["libs/utils/src/index.ts"]
     }
   },

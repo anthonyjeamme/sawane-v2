@@ -1,46 +1,42 @@
-import React, { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
 import uniqid from 'uniqid';
+import { ContextMenuProvider } from '@sawane/ui/context-menu';
 
 import styles from './Blueprint.module.scss';
 
-import { classNameModule, useStateAndRef } from '@sawane/utils';
-import {
-  DotsSixVertical,
-  Lightning,
-  PencilSimple,
-  Plus,
-  TrashSimple,
-} from 'phosphor-react';
-import { useContextMenu } from './ContextMenu/ContextMenu.hook';
-import { ContextMenu, ContextMenuProvider } from './ContextMenu/ContextMenu';
+import { classNameModule } from '@sawane/utils';
+import { ChatCenteredText, Plus } from 'phosphor-react';
+import { BlueprintItem } from './BlueprintItem/BlueprintItem';
+import { useBlueprint } from './Blueprint.hook';
+import { alignPositionToGrid } from './Blueprint.utils';
 
 const className = classNameModule(styles);
 
-export const Blueprint = () => {
-  const [data, updateData, getDataRef] = useStateAndRef({
-    items: [
-      {
-        id: 'a',
-        title: 'hello',
-        color: '#0984e3',
-        actions: [
-          {
-            id: 'b',
-            text: 'blabla',
-            link: 'b',
-          },
-        ],
-      },
-      {
-        id: 'b',
-        color: '#d63031',
-        title: 'world',
-        actions: [],
-      },
-    ],
-  });
+const fakeData = {
+  items: [
+    {
+      id: 'a',
+      title: 'hello',
+      color: '#0984e3',
+      actions: [
+        {
+          id: 'b',
+          text: 'blabla',
+          link: 'b',
+        },
+      ],
+    },
+    {
+      id: 'b',
+      color: '#d63031',
+      title: 'world',
+      actions: [],
+    },
+  ],
+};
 
+export const Blueprint = () => {
   const [currentLinkDrawing, setCurrentLinkDrawing] = useState(null);
 
   const isDraggingRef = useRef(false);
@@ -51,13 +47,15 @@ export const Blueprint = () => {
 
   const [arrows, setArrows] = useState<TArrow[]>([]);
 
-  const positionRef = useRef({
+  const positionRef = useRef<{ [key: string]: TPosition }>({
     a: { x: 80, y: 120 },
     b: { x: 40 * 16, y: 120 * 2 },
     c: { x: 40 * 22, y: 120 },
     d: { x: 40 * 13, y: 40 * 8 },
     e: { x: 40 * 13, y: 40 * 8 },
   });
+
+  const { data, refresh } = useBlueprint(fakeData);
 
   useEffect(() => {
     const handleMouseDown = (e: MouseEvent) => {
@@ -115,14 +113,11 @@ export const Blueprint = () => {
   const updateLinks = () => {
     const arrows: TArrow[] = [];
 
-    for (const item of getDataRef().items) {
+    for (const item of data.items) {
       for (let i = 0; i < item.actions.length; i++) {
         const action = item.actions[i];
 
-        if (
-          action.link &&
-          getDataRef().items.find(({ id }) => action.link === id)
-        ) {
+        if (action.link && data.items.find(({ id }) => action.link === id)) {
           const aWidth = 320;
 
           const aPosition = {
@@ -146,52 +141,42 @@ export const Blueprint = () => {
   };
 
   return (
-    <>
-      {/* <ContextMenu
-        {...contextMenu}
-        handleAction={(action) => {
-          if (action === 'new-step') {
-            const id = uniqid();
+    <ContextMenuProvider
+      definition={{
+        items: [
+          {
+            type: 'menu',
+            label: 'Étape',
+            icon: <Plus />,
+            menu: [
+              {
+                type: 'item',
+                label: 'Textuel',
+                icon: <ChatCenteredText />,
+                handleClick: (position) => {
+                  if (!containerRef.current) return;
 
-            positionRef.current[id] = {
-              x:
-                Math.round(
-                  (contextMenu.position.x + containerRef.current?.scrollLeft) /
-                    40
-                ) * 40,
-              y:
-                Math.round(
-                  (contextMenu.position.y + containerRef.current?.scrollTop) /
-                    40
-                ) * 40,
-            };
-            updateData({
-              ...getDataRef(),
-              items: [
-                ...getDataRef().items,
-                {
-                  id,
-                  title: 'Nouvelle étape',
-                  actions: [
-                    {
-                      id: 'a' + uniqid(),
-                      text: 'Action A',
-                      link: null,
-                    },
-                    {
-                      id: 'b' + uniqid(),
-                      text: 'Action B',
-                      link: null,
-                    },
-                  ],
+                  const id = uniqid();
+                  positionRef.current[id] = alignPositionToGrid({
+                    x: position.x + containerRef.current.scrollLeft,
+                    y: position.y + containerRef.current.scrollTop,
+                  });
+
+                  data.items.push({
+                    id,
+                    color: '#d63031',
+                    title: 'Nouvelle étape',
+                    actions: [],
+                  });
+
+                  refresh();
                 },
-              ],
-            });
-
-            updateLinks();
-          }
-        }}
-      /> */}
+              },
+            ],
+          },
+        ],
+      }}
+    >
       <div
         className={styles['Blueprint']}
         ref={containerRef}
@@ -201,7 +186,7 @@ export const Blueprint = () => {
       >
         <div data-scroller>
           {data.items.map((item) => (
-            <Item
+            <BlueprintItem
               item={item}
               position={positionRef.current[item.id]}
               key={item.id}
@@ -209,20 +194,17 @@ export const Blueprint = () => {
                 positionRef.current[item.id] = position;
                 updateLinks();
               }}
-              handleUpdate={(item) => {
-                updateData({
-                  ...getDataRef(),
-                  items: getDataRef().items.map((_item) =>
-                    _item.id === item.id ? item : _item
-                  ),
-                });
+              handleUpdate={(itemUpdate) => {
+                data.items = data.items.map((_item) =>
+                  _item.id === item.id ? { ..._item, ...itemUpdate } : _item
+                );
+
+                refresh();
                 updateLinks();
               }}
               handleRemove={() => {
-                updateData({
-                  ...getDataRef(),
-                  items: getDataRef().items.filter(({ id }) => id !== item.id),
-                });
+                data.items = data.items.filter(({ id }) => id !== item.id);
+                refresh();
                 updateLinks();
               }}
               handleClickActionlink={(actionId) => {
@@ -237,25 +219,20 @@ export const Blueprint = () => {
                 const { itemId, actionId } = currentLinkDrawing;
                 const targetId = item.id;
 
-                updateData({
-                  ...getDataRef(),
-                  items: getDataRef().items.map((item) =>
-                    item.id === itemId
-                      ? {
-                          ...item,
-                          actions: item.actions.map((action) =>
-                            action.id === actionId
-                              ? {
-                                  ...action,
-                                  link: targetId,
-                                }
-                              : action
-                          ),
-                        }
-                      : item
-                  ),
-                });
+                const findItem = data.items.find(
+                  (_item) => _item.id === itemId
+                );
 
+                findItem.actions = findItem.actions.map((action) =>
+                  action.id === actionId
+                    ? {
+                        ...action,
+                        link: targetId,
+                      }
+                    : action
+                );
+
+                refresh();
                 setCurrentLinkDrawing(null);
                 updateLinks();
               }}
@@ -268,7 +245,7 @@ export const Blueprint = () => {
           </div>
         </div>
       </div>
-    </>
+    </ContextMenuProvider>
   );
 };
 
@@ -320,239 +297,7 @@ const Arrow = ({ arrow }: { arrow: TArrow }) => {
   );
 };
 
-const Item = ({
-  item,
-  position,
-  updatePosition,
-  handleClickActionlink,
-  handleCLickLink,
-  handleRemove,
-  handleUpdate,
-}) => {
-  const rootRef = useRef<HTMLDivElement>(null);
-  const draggerRef = useRef<HTMLDivElement>(null);
-
-  const handleUpdatePosition = ({ x, y }: TPosition, smooth: boolean) => {
-    if (!rootRef.current) return;
-
-    if (smooth) {
-      rootRef.current.style.transition = 'transform 200ms';
-
-      setTimeout(() => {
-        if (!rootRef.current) return;
-        rootRef.current.style.transition = 'none';
-      }, 250);
-    }
-
-    updatePosition({ x, y });
-
-    rootRef.current.style.transform = `translate(${x}px, ${y}px)`;
-  };
-
-  const { isDragging } = useDragger(draggerRef, position, handleUpdatePosition);
-
-  return (
-    <ContextMenuProvider>
-      <div
-        {...className('ItemContainer')}
-        ref={rootRef}
-        style={{
-          transform: `translate(${position?.x}px, ${position?.y}px)`,
-        }}
-      >
-        <div {...className('Item', { isDragging })}>
-          <header
-            onClick={() => {
-              handleCLickLink();
-            }}
-            style={{
-              backgroundColor: item.color,
-            }}
-          >
-            <span className={styles['title']}>
-              <input defaultValue={item.title} />
-            </span>
-            <button
-              className={styles['remove']}
-              onClick={() => {
-                handleRemove();
-              }}
-            >
-              <TrashSimple />
-            </button>
-            <button className={styles['edit']} title="Editer">
-              <PencilSimple weight="bold" />
-            </button>
-            <button ref={draggerRef} className={styles['dragger']}>
-              <DotsSixVertical weight="bold" />
-            </button>
-          </header>
-          <div className={styles['content']}>
-            {item.actions.map((action) => (
-              <div
-                {...className('action')}
-                key={action.id}
-                onClick={() => {
-                  handleClickActionlink(action.id);
-                }}
-              >
-                <button
-                  onClick={() => {
-                    handleUpdate({
-                      ...item,
-                      actions: item.actions.filter(
-                        ({ id }) => id !== action.id
-                      ),
-                    });
-                  }}
-                >
-                  <TrashSimple />
-                </button>
-                <button>
-                  <Lightning />
-                </button>
-                <span>
-                  <input
-                    defaultValue={action.text}
-                    onChange={(e) => {
-                      handleUpdate({
-                        ...item,
-                        actions: item.actions.map((_action) =>
-                          _action.id === action.id
-                            ? {
-                                ...action,
-                                text: e.target.value,
-                              }
-                            : _action
-                        ),
-                      });
-                    }}
-                  />
-                </span>
-              </div>
-            ))}
-
-            <div
-              {...className('add-action')}
-              onClick={() => {
-                handleUpdate({
-                  ...item,
-                  actions: [
-                    ...item.actions,
-                    {
-                      id: uniqid(),
-                      text: 'Nouvelle action',
-                      link: null,
-                    },
-                  ],
-                });
-              }}
-            >
-              <Plus />
-            </div>
-          </div>
-        </div>
-      </div>
-    </ContextMenuProvider>
-  );
-};
-
 type TPosition = {
   x: number;
   y: number;
-};
-
-const useDragger = (
-  elementRef: React.RefObject<HTMLDivElement>,
-  initialPosition: TPosition,
-  handleUpdatePosition: (position: TPosition, smooth: boolean) => void
-) => {
-  const isDraggingRef = useRef(false);
-  const lastMousePositionRef = useRef<TPosition | null>(null);
-  const [isDragging, setIsDragging] = useState(false);
-  const currentPositionRef = useRef<TPosition | null>(initialPosition);
-
-  const updateElementPosition = (smooth: boolean) => {
-    if (!currentPositionRef.current) return;
-
-    handleUpdatePosition(
-      {
-        ...currentPositionRef.current,
-      },
-      smooth
-    );
-  };
-
-  const handleMouseDown = (e: MouseEvent) => {
-    setIsDragging(true);
-    isDraggingRef.current = true;
-    lastMousePositionRef.current = {
-      x: e.clientX,
-      y: e.clientY,
-    };
-
-    window.addEventListener('mouseup', handleMouseUp);
-    window.addEventListener('blur', handleMouseUp);
-  };
-
-  const handleMouseUp = () => {
-    setIsDragging(false);
-    isDraggingRef.current = false;
-    lastMousePositionRef.current = null;
-
-    if (currentPositionRef.current)
-      currentPositionRef.current = {
-        x: Math.round(currentPositionRef.current.x / 40) * 40,
-        y: Math.round(currentPositionRef.current.y / 40) * 40,
-      };
-
-    updateElementPosition(true);
-
-    window.removeEventListener('mouseup', handleMouseUp);
-  };
-
-  const handleMouseMove = (e) => {
-    if (
-      !isDraggingRef.current ||
-      !lastMousePositionRef.current ||
-      !currentPositionRef.current ||
-      !elementRef.current
-    )
-      return;
-
-    const delta = {
-      x: e.clientX - lastMousePositionRef.current.x,
-      y: e.clientY - lastMousePositionRef.current.y,
-    };
-
-    currentPositionRef.current = {
-      x: currentPositionRef.current.x + delta.x,
-      y: currentPositionRef.current.y + delta.y,
-    };
-
-    updateElementPosition(false);
-
-    lastMousePositionRef.current = {
-      x: e.clientX,
-      y: e.clientY,
-    };
-  };
-
-  useEffect(() => {
-    if (!elementRef.current) return;
-
-    elementRef.current.addEventListener('mousedown', handleMouseDown);
-
-    window.addEventListener('mousemove', handleMouseMove);
-
-    return () => {
-      if (!elementRef.current) return;
-      elementRef.current.removeEventListener('mousedown', handleMouseDown);
-      window.removeEventListener('mousemove', handleMouseMove);
-    };
-  }, []);
-
-  return {
-    isDragging,
-  };
 };
