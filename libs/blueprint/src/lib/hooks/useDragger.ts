@@ -28,6 +28,8 @@ export const useDragger = (
       x: e.clientX,
       y: e.clientY,
     };
+    e.preventDefault();
+    e.stopPropagation();
 
     window.addEventListener('mouseup', handleMouseUp);
     window.addEventListener('blur', handleMouseUp);
@@ -40,8 +42,8 @@ export const useDragger = (
 
     if (currentPositionRef.current)
       currentPositionRef.current = {
-        x: Math.round(currentPositionRef.current.x / 40) * 40,
-        y: Math.round(currentPositionRef.current.y / 40) * 40,
+        x: Math.round(currentPositionRef.current.x / 20) * 20,
+        y: Math.round(currentPositionRef.current.y / 20) * 20,
       };
 
     updateElementPosition(true);

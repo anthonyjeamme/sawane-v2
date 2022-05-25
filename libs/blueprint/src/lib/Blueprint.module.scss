@@ -1,21 +1,93 @@
 .Blueprint {
-  background-color: #aaa;
+  background-color: #0f0f0f;
   position: fixed;
   top: 0;
   left: 0;
   right: 0;
   bottom: 0;
-  overflow: hidden;
   user-select: none;
+  overflow: hidden;
 
   &::-webkit-scrollbar {
     width: 0;
   }
 
   & > div {
-    width: 10000px;
-    height: 10000px;
+    width: 2000px;
+    height: 2000px;
     background-image: url('/blueprint-bg.png');
+    background-color: #1c1c1e;
+  }
+
+  .selection {
+    position: absolute;
+    top: 200px;
+    left: 200px;
+    height: 200px;
+    width: 200px;
+    background-color: rgba(white, 0.1);
+    border: 2px solid rgba(white, 0.2);
+    z-index: 1000;
+  }
+
+  .Node {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 320px;
+    background-color: #262626;
+    border-radius: 6px;
+    z-index: 100;
+
+    &::after {
+      content: '';
+      display: block;
+      position: absolute;
+      pointer-events: none;
+      top: -4px;
+      left: -4px;
+      right: -4px;
+      bottom: -4px;
+      border: 2px solid white;
+      z-index: 200;
+      border-radius: 10px;
+      opacity: 0;
+      transition: opacity 250ms;
+    }
+
+    &.selected {
+      &::after {
+        opacity: 1;
+      }
+    }
+
+    & > header {
+      background-color: #3d3d3c;
+      border-radius: 6px;
+      height: 40px;
+      padding: 0 10px;
+      color: rgba(white, 0.4);
+      display: flex;
+      align-items: center;
+      cursor: move;
+      transition: background-color 200ms;
+      user-select: none;
+
+      &:active {
+        background-color: #474746;
+      }
+    }
+
+    .dragger {
+      position: absolute;
+      top: 5px;
+      right: 5px;
+      height: 30px;
+      width: 30px;
+      background-color: red;
+      z-index: 10;
+      cursor: pointer;
+    }
   }
 }
 
@@ -29,4 +101,16 @@
     left: 0;
     display: block;
   }
+}
+
+.demo-textarea {
+  border: 0;
+  width: 100%;
+  resize: none;
+  font: inherit;
+  color: inherit;
+  background-color: #2f2f2e;
+  outline: none;
+  padding: 10px;
+  display: block;
 }

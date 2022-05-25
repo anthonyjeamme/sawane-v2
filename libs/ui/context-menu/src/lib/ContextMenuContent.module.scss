@@ -26,9 +26,12 @@
     align-items: center;
     background-color: transparent;
     transition: background-color 250ms;
+    border-radius: 2px;
+    color: white;
+    white-space: nowrap;
 
     &:hover {
-      background-color: #eeeeee;
+      background-color: rgba(white, 0.1);
     }
 
     & > .icon {
@@ -64,7 +67,7 @@
 
   & > .submenu {
     position: absolute;
-    background-color: white;
+    background-color: #262626;
     border-radius: 4px;
     padding: 4px;
     left: 100%;

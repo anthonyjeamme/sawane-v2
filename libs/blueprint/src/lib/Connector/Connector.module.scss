@@ -1,0 +1,54 @@
+.Connector {
+  position: absolute;
+  z-index: 900;
+  height: 12px;
+  width: 12px;
+  border-radius: 12px;
+  background-color: currentColor;
+  transform: translate(-50%, -50%);
+
+  &::before {
+    content: '';
+    top: -10px;
+    left: -10px;
+    right: -10px;
+    bottom: -10px;
+    border-radius: 50px;
+    opacity: 0.1;
+    display: block;
+    position: absolute;
+  }
+
+  &::after {
+    content: '';
+    top: -10px;
+    left: -10px;
+    right: -10px;
+    bottom: -10px;
+    border-radius: 50px;
+    background-color: currentColor;
+    opacity: 0.1;
+    display: block;
+    position: absolute;
+    transform: scale(0);
+    transition: transform 250ms, opacity 250ms;
+    pointer-events: none;
+  }
+
+  &.isDraggable {
+    cursor: crosshair;
+
+    &:hover,
+    &.isDrawingArrow {
+      &::after {
+        transform: scale(1);
+      }
+    }
+
+    &.isDrawingArrow {
+      &::after {
+        opacity: 0.2;
+      }
+    }
+  }
+}

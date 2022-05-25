@@ -1,0 +1,133 @@
+.BlueprintNode {
+  background-color: #262626;
+  border-radius: 6px;
+  color: white;
+
+  .BlueprintNodeHeader {
+    height: 40px;
+    position: relative;
+    border-bottom: 0;
+    background-color: #3d3d3c;
+    border-radius: 6px;
+    margin-bottom: 20px;
+  }
+
+  .NodeInOut {
+    height: 30px;
+    position: relative;
+
+    border-top: 0;
+    border-bottom: 0;
+  }
+  .BlueprintProperties {
+    border-top: 0;
+
+    & > :nth-child(1) {
+      margin-top: 10px;
+    }
+  }
+}
+
+.ConnexionPoint {
+  height: 10px;
+  width: 10px;
+  background-color: currentColor;
+  border-radius: 12px;
+  border: 2px solid currentColor;
+  position: absolute;
+  top: 50%;
+  cursor: crosshair;
+  display: flex;
+  align-items: center;
+
+  &::after {
+    content: '';
+    position: absolute;
+    display: block;
+    background-color: currentColor;
+    left: -10px;
+    right: -10px;
+    border-radius: 40px;
+    top: -10px;
+    bottom: -10px;
+    transition: opacity 250ms;
+    opacity: 0;
+  }
+
+  &:hover {
+    &::after {
+      opacity: 0.1;
+    }
+  }
+
+  &.input {
+    left: 0;
+    transform: translateY(-50%) translateX(-50%);
+  }
+
+  &.output {
+    right: 0;
+    transform: translateY(-50%) translateX(50%);
+  }
+}
+
+.BlueprintProperty {
+  position: relative;
+
+  & > .header {
+    padding: 2px 4px 2px 10px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background-color: transparent;
+    width: 100%;
+    // background-color: #2f2f2e;
+    font-weight: 500;
+    user-select: none;
+    font-size: 15px;
+    transition: background-color 250ms;
+
+    .caret {
+      height: 28px;
+      width: 28px;
+      padding: 0;
+      display: flex;
+      background-color: transparent;
+      border: 0;
+      color: inherit;
+      font-size: 20px;
+      transition: transform 250ms, opacity 250ms;
+      color: white;
+      color: rgba(white, 0.7);
+      opacity: 0.5;
+
+      &:hover {
+        opacity: 1;
+      }
+
+      &.isOpen {
+        transform: rotate(-180deg);
+      }
+      & > svg {
+        margin: auto;
+        display: block;
+      }
+    }
+
+    &.minimizable {
+      cursor: pointer;
+
+      &:hover {
+        background-color: #2f2f2e;
+      }
+    }
+
+    & > span {
+      color: rgba(white, 0.3);
+    }
+  }
+
+  .BlueprintPropertyContent {
+    padding: 10px;
+  }
+}
