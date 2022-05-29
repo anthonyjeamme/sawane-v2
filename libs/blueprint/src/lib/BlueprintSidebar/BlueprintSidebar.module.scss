@@ -1,0 +1,60 @@
+.BlueprintSidebar {
+  //
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  width: 350px;
+  z-index: 1000;
+  background-color: #0f0f0f;
+  color: white;
+  padding: 10px 6px;
+  box-sizing: border-box;
+  border-left: 1px solid rgba(#ffffff, 0.1);
+  overflow: hidden;
+  transition: width 300ms;
+
+  &.reduced {
+    width: 51px;
+  }
+
+  & > header {
+    display: flex;
+    justify-content: flex-end;
+
+    .close-button {
+      cursor: pointer;
+      color: white;
+      background-color: transparent;
+      padding: 0;
+      font-size: 20px;
+      opacity: 0.5;
+      height: 38px;
+      width: 38px;
+      border: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: opacity 250ms;
+
+      & > svg {
+        transition: transform 250ms;
+      }
+      &:hover {
+        opacity: 1;
+      }
+    }
+    margin-bottom: 10px;
+  }
+
+  &.reduced .close-button > svg {
+    transform: scaleX(-1);
+  }
+
+  & > div {
+    border-radius: 6px;
+    background-color: #262626;
+    padding: 10px;
+    margin-bottom: 10px;
+  }
+}

@@ -27,6 +27,7 @@ import { classNameModule } from '@sawane/utils';
 import { Connector } from './Connector/Connector';
 import { BlueprintContextProvider } from './Blueprint.context';
 import { useBlueprintPosition } from './hooks/useBlueprintPosition';
+import { BlueprintSidebar } from './BlueprintSidebar/BlueprintSidebar';
 
 const className = classNameModule(styles);
 const fakeData = {
@@ -42,7 +43,10 @@ export const Blueprint = () => {
 
   const [selectedItems, setSelectedItems] = useState<string[]>([]);
 
-  const { data, refresh, connectNodes } = useBlueprint(fakeData);
+  const { data, refresh, connectNodes, getConnectionDefinition } = useBlueprint(
+    fakeData,
+    definitions
+  );
 
   const [selection, setSelection] = useState<{
     from: TPosition;
@@ -97,7 +101,14 @@ export const Blueprint = () => {
       const nearConnector = getNearConnector(point);
 
       if (nearConnector) {
-        blueprintArrows.updateDrawingArrow(nearConnector.position);
+        const fromDefinition = getConnectionDefinition(fromPath);
+        const toDefinition = getConnectionDefinition(nearConnector.path);
+
+        if (connectionAreCompatibles(fromDefinition, toDefinition)) {
+          blueprintArrows.updateDrawingArrow(nearConnector.position);
+        } else {
+          blueprintArrows.updateDrawingArrow(point);
+        }
       } else {
         blueprintArrows.updateDrawingArrow(point);
       }
@@ -111,8 +122,13 @@ export const Blueprint = () => {
       const nearConnector = getNearConnector(point);
 
       if (nearConnector?.path) {
-        connectNodes(fromPath, nearConnector.path);
-        blueprintArrows.update(data);
+        const fromDefinition = getConnectionDefinition(fromPath);
+        const toDefinition = getConnectionDefinition(nearConnector.path);
+
+        if (connectionAreCompatibles(fromDefinition, toDefinition)) {
+          connectNodes(fromPath, nearConnector.path);
+          blueprintArrows.update(data);
+        }
       } else {
         connectNodes(fromPath, null);
         blueprintArrows.update(data);
@@ -314,6 +330,7 @@ export const Blueprint = () => {
           ],
         }}
       >
+        <BlueprintSidebar />
         <div
           className={styles['Blueprint']}
           onContextMenu={(e) => {
@@ -420,21 +437,25 @@ const Node = ({
           e.stopPropagation();
         }}
       >
-        <Connector
-          color="white"
-          type="input"
-          path={[item.id, 'input']}
-          handleStartDrawingArrow={handleStartDrawingArrow}
-          position={{ x: 0, y: 20 }}
-        />
+        {definition.input && (
+          <Connector
+            color={definition.input.color || 'white'}
+            type="input"
+            path={[item.id, 'input']}
+            handleStartDrawingArrow={handleStartDrawingArrow}
+            position={{ x: 0, y: 20 }}
+          />
+        )}
 
-        <Connector
-          color="white"
-          type="output"
-          path={[item.id, 'output']}
-          handleStartDrawingArrow={handleStartDrawingArrow}
-          position={{ x: 320, y: 20 }}
-        />
+        {definition.output && (
+          <Connector
+            color={definition.output.color || 'white'}
+            type="output"
+            path={[item.id, 'output']}
+            handleStartDrawingArrow={handleStartDrawingArrow}
+            position={{ x: 320, y: 20 }}
+          />
+        )}
 
         <header
           ref={draggerRef}
@@ -460,10 +481,19 @@ const definitions: Record<string, TBlueprintNodeDefinition> = {
   gameover: {
     label: 'Game over',
     color: '#b33939',
+    input: {
+      types: ['gameover'],
+      color: '#b33939',
+    },
   },
   textStep: {
     label: 'Etape textuelle',
     color: '#cd6133',
+    input: {},
+    output: {
+      color: '#474787',
+      types: ['video'],
+    },
     properties: [
       {
         name: 'text',
@@ -487,6 +517,14 @@ const definitions: Record<string, TBlueprintNodeDefinition> = {
   videoStep: {
     label: 'Etape vidéo',
     color: '#474787',
+    input: {
+      color: '#474787',
+      types: ['video'],
+    },
+    output: {
+      color: '#b33939',
+      types: ['gameover'],
+    },
     properties: [
       {
         name: 'text',
@@ -510,4 +548,12 @@ const definitions: Record<string, TBlueprintNodeDefinition> = {
     label: 'Aller au chapitre',
     color: '#218c74',
   },
+};
+
+const connectionAreCompatibles = (from, to) => {
+  for (const type of from.types) {
+    if (to.types.includes(type)) return true;
+  }
+
+  return false;
 };

@@ -27,7 +27,6 @@ export const useBlueprintArrows = (blueprintPosition) => {
         const toElement = document.querySelector(
           `[data-path="${toPath.join(',')}"]`
         );
-        // console.log(fromElement, '===>', toElement);
 
         if (fromElement && toElement) {
           const fromPosition = blueprintPosition.getElementPosition(
@@ -38,8 +37,6 @@ export const useBlueprintArrows = (blueprintPosition) => {
             toElement,
             true
           );
-
-          console.log({ fromPosition, toPosition });
 
           arrows.push({
             id: uniqid(),

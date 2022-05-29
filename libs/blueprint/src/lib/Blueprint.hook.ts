@@ -1,6 +1,10 @@
 import { useRef, useState } from 'react';
+import { TBlueprintNodeDefinition } from './BlueprintNode/BlueprintNode.types';
 
-export const useBlueprint = (initData: TBlueprintData) => {
+export const useBlueprint = (
+  initData: TBlueprintData,
+  definitions: Record<string, TBlueprintNodeDefinition>
+) => {
   const dataRef = useRef<TBlueprintData>(initData);
   const refresh = useRefresh();
 
@@ -25,11 +29,29 @@ export const useBlueprint = (initData: TBlueprintData) => {
     refresh();
   };
 
+  const getConnectionDefinition = (path: string[]) => {
+    //
+
+    const [nodeId] = path;
+
+    const node = dataRef.current.items.find((node) => node.id === nodeId);
+
+    if (!node) return null;
+
+    if (path[1] === 'input') {
+      return definitions[node.type].input;
+    } else if (path[1] === 'output') {
+      return definitions[node.type].output;
+    }
+    return null;
+  };
+
   //
   return {
     data: dataRef.current,
     refresh,
     connectNodes,
+    getConnectionDefinition,
   };
 };
 
